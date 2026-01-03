@@ -44,7 +44,15 @@ export function AuthProvider({ children }) {
       localStorage.setItem('user', JSON.stringify(userData));
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || error.message };
+      return {
+  success: false,
+  error:
+    error.response?.data?.error ||
+    error.response?.data?.message ||
+    JSON.stringify(error.response?.data) ||
+    error.message,
+};
+
     }
   };
 
