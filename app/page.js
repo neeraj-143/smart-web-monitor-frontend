@@ -1,16 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from './AuthContext';
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
-  const { user, logout, loading: authLoading } = useAuth();
-  const router = useRouter();
-
   const [monitors, setMonitors] = useState([]);
   const [selectedMonitor, setSelectedMonitor] = useState(null);
   const [history, setHistory] = useState([]);
@@ -20,19 +15,10 @@ export default function Home() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Redirect to login if not authenticated
-  // useEffect(() => {
-  //   if (!authLoading && !user) {
-  //     router.push('/login');
-  //   }
-  // }, [user, authLoading, router]);
-
   // Fetch monitors on mount
   useEffect(() => {
-    if (user) {
-      fetchMonitors();
-    }
-  }, [user]);
+    fetchMonitors();
+  }, []);
 
   // Fetch history when monitor is selected
   useEffect(() => {
@@ -48,7 +34,7 @@ export default function Home() {
       setMonitors(response.data);
       setError('');
     } catch (err) {
-      setError('Failed to fetch monitors');
+      setError('Failed to fetch monitors: ' + err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -109,39 +95,17 @@ export default function Home() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
-
   const getStatusColor = (status) => {
     return status === 'UP' ? 'text-green-600' : 'text-red-600';
   };
 
-  if (authLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header with Logout */}
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">Smart Web Monitor</h1>
-            <p className="text-gray-600">Monitor website availability and response times</p>
-            <p className="text-sm text-gray-500 mt-2">Logged in as: <span className="font-semibold">{user.email}</span></p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 font-semibold transition"
-          >
-            Logout
-          </button>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">Smart Web Monitor</h1>
+          <p className="text-gray-600">Monitor website availability and response times</p>
         </div>
 
         {/* Messages */}
