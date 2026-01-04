@@ -21,11 +21,11 @@ export default function Home() {
   const [success, setSuccess] = useState('');
 
   // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, authLoading, router]);
+  // useEffect(() => {
+  //   if (!authLoading && !user) {
+  //     router.push('/login');
+  //   }
+  // }, [user, authLoading, router]);
 
   // Fetch monitors on mount
   useEffect(() => {
