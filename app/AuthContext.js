@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -10,7 +9,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in (from localStorage)
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -20,37 +18,45 @@ export function AuthProvider({ children }) {
 
   const signUp = async (email, password) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
-        email,
-        password
-      });
-      const userData = response.data.user;
+      // Check if user already exists
+      const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
+      if (existingUsers[email]) {
+        return { success: false, error: 'Email already registered' };
+      }
+
+      // Store user
+      existingUsers[email] = { email, password };
+      localStorage.setItem('users', JSON.stringify(existingUsers));
+      
+      const userData = { email };
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
+      
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.error || error.message 
-      };
+      return { success: false, error: error.message };
     }
   };
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
-        email,
-        password
-      });
-      const userData = response.data.user;
+      const existingUsers = JSON.parse(localStorage.getItem('users') || '{}');
+      
+      if (!existingUsers[email]) {
+        return { success: false, error: 'Email not found' };
+      }
+
+      if (existingUsers[email].password !== password) {
+        return { success: false, error: 'Wrong password' };
+      }
+
+      const userData = { email };
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
+      
       return { success: true };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.error || error.message
-      };
+      return { success: false, error: error.message };
     }
   };
 
